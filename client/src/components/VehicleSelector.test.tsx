@@ -1,72 +1,107 @@
-import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import '@testing-library/jest-dom/extend-expect';
-import { act } from 'react'; // Import act from react
+import { render, fireEvent, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { act } from 'react';
 import VehicleSelector from './VehicleSelector';
 
 describe('VehicleSelector Component', () => {
-//   test('renders the component with initial state', () => {
-//     render(<VehicleSelector />);
-//     expect(screen.getByText('Select Your Vehicle')).toBeInTheDocument();
-//     expect(screen.getByLabelText('Make')).toBeInTheDocument();
-//   });
+    test('renders correctly and allows selecting vehicle details', async () => {
+        await act(async () => {
+            render(<VehicleSelector />);
+        });
 
-//   test('renders models when a make is selected', async () => {
-//     render(<VehicleSelector />);
-    
-//     await act(async () => {
-//       fireEvent.mouseDown(screen.getByLabelText('Make'));
-//       fireEvent.click(screen.getByText('Ford'));
-//     });
+        // Check that the make dropdown is present
+        expect(screen.getByLabelText(/make/i)).toBeInTheDocument();
 
-//     await waitFor(() => {
-//       expect(screen.getByLabelText('Model')).toBeInTheDocument();
-//     });
-//   });
+        // Open make dropdown and select 'Ford'
+        await act(async () => {
+            userEvent.click(screen.getByLabelText(/make/i));
+        });
 
-//   test('renders badges when a model is selected', async () => {
-//     render(<VehicleSelector />);
-    
-//     await act(async () => {
-//       fireEvent.mouseDown(screen.getByLabelText('Make'));
-//       fireEvent.click(screen.getByText('Ford'));
-//     });
+        // Use a custom text matcher function to find 'Ford'
+        const fordOption = screen.getByRole('option', { name: (content, element) => element?.textContent === 'Ford' });
+        await act(async () => {
 
-//     await act(async () => {
-//       fireEvent.mouseDown(screen.getByLabelText('Model'));
-//       fireEvent.click(screen.getByText('Ranger'));
-//     });
+            userEvent.click(fordOption);
+        })
 
-//     await waitFor(() => {
-//       expect(screen.getByLabelText('Badge')).toBeInTheDocument();
-//     });
-//   });
+        // Check that the model dropdown is present
+        await waitFor(() => {
+            expect(screen.getByLabelText(/model/i)).toBeInTheDocument();
+        });
 
-//   test('allows file upload when a badge is selected', async () => {
-//     render(<VehicleSelector />);
-    
-//     await act(async () => {
-//       fireEvent.mouseDown(screen.getByLabelText('Make'));
-//       fireEvent.click(screen.getByText('Ford'));
-//     });
+        // Open model dropdown and select 'Ranger'
+        await act(async () => {
+            userEvent.click(screen.getByLabelText(/model/i));
+        });
 
-//     await act(async () => {
-//       fireEvent.mouseDown(screen.getByLabelText('Model'));
-//       fireEvent.click(screen.getByText('Ranger'));
-//     });
+        const rangerOption = screen.getByRole('option', { name: (content, element) => element?.textContent === 'Ranger' });
+        await act(async () => {
 
-//     await act(async () => {
-//       fireEvent.mouseDown(screen.getByLabelText('Badge'));
-//       fireEvent.click(screen.getByText('Raptor'));
-//     });
+            userEvent.click(rangerOption);
+        })
 
-//     const fileInput = screen.getByLabelText(/upload service logbook/i);
-//     const file = new File(['service log'], 'service-log.txt', { type: 'text/plain' });
+        // Check that the badge dropdown is present
+        await waitFor(() => {
+            expect(screen.getByLabelText(/badge/i)).toBeInTheDocument();
+        });
 
-//     await act(async () => {
-//       fireEvent.change(fileInput, { target: { files: [file] } });
-//     });
+        // Open badge dropdown and select 'Raptor'
+        await act(async () => {
+            userEvent.click(screen.getByLabelText(/badge/i));
+        });
 
-//     expect(screen.getByText('service-log.txt')).toBeInTheDocument();
-//   });
+        const raptorOption = screen.getByRole('option', { name: (content, element) => element?.textContent === 'Raptor' });
+        await act(async () => {
+
+            userEvent.click(raptorOption);
+        })
+
+        // Check that the upload button is present
+        expect(screen.getByText(/upload service logbook/i)).toBeInTheDocument();
+
+        // Simulate file upload
+        const file = new File(['service logbook content'], 'logbook.txt', { type: 'text/plain' });
+        const input = screen.getByLabelText(/upload service logbook/i);
+
+        await act(async () => {
+            userEvent.upload(input, file);
+        });
+
+        // Check that the uploaded file name is displayed
+        await waitFor(() => {
+            expect(screen.getByText('logbook.txt')).toBeInTheDocument();
+        });
+
+    });
+
+    test('quick select buttons work correctly', async () => {
+        await act(async () => {
+            render(<VehicleSelector />);
+        });
+
+        // Click the quick select button for Ford Ranger Raptor
+        await act(async () => {
+            userEvent.click(screen.getByRole('button', { name: /quick select ford ranger raptor/i }));
+        });
+
+        // Check that the dropdowns are correctly populated
+        await waitFor(() => {
+            expect(screen.getByText('Ford')).toBeInTheDocument();
+            expect(screen.getByText('Ranger')).toBeInTheDocument();
+            expect(screen.getByText('Raptor')).toBeInTheDocument();
+
+        });
+
+        // Click the quick select button for Tesla Model 3 Performance
+        await act(async () => {
+            userEvent.click(screen.getByText(/quick select tesla model 3 performance/i));
+        });
+
+        // Check that the dropdowns are correctly populated
+        await waitFor(() => {
+            expect(screen.getByText('Tesla')).toBeInTheDocument();
+            expect(screen.getByText('Model 3')).toBeInTheDocument();
+            expect(screen.getByText('Performance')).toBeInTheDocument();
+        });
+    });
 });

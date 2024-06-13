@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, Typography, Button, Grid } from '@mui/material';
+import { Box, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, Typography, Button, Snackbar, Alert } from '@mui/material';
 
 
 type MODELS_TYPE = {
@@ -29,7 +29,8 @@ const VehicleSelector: React.FC = () => {
   const [model, setModel] = useState('');
   const [badge, setBadge] = useState('');
   const [logbook, setLogbook] = useState<File | null>(null);
-
+  const [open, setOpen] = useState<boolean>(false)
+  const [message, setMessage] = useState<string | ''>('')
   const handleMakeChange = (event: SelectChangeEvent<string>) => {
     setMake(event.target.value as string);
     setModel('');
@@ -77,95 +78,117 @@ const VehicleSelector: React.FC = () => {
         body: formData,
       });
       const result = await response.json();
+      setMessage('Submit Successfully!')
       console.log(result);
     } catch (error) {
+     
+
+      setMessage('Submit Failed!')
+
       console.error('Error submitting form:', error);
     }
+    setOpen(true)
   };
 
   return (
     <Box component="form" onSubmit={handleSubmit}>
+      <Snackbar open={open} autoHideDuration={2000} 
+      onClose={()=> setOpen(false)}
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'center'
+        }} >
+        <Alert
+          severity={message.includes('Failed')? 'error' : 'success'}
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {message}
+        </Alert>
+      </Snackbar>
+
       <Typography variant="h4">Select Your Vehicle</Typography>
-          <Button variant="contained" onClick={() => handleQuickSelect('ford', 'Ranger', 'Raptor')}>
-            Quick Select Ford Ranger Raptor
-          </Button>
+      <Button variant="contained" onClick={() => handleQuickSelect('ford', 'Ranger', 'Raptor')}>
+        Quick Select Ford Ranger Raptor
+      </Button>
 
-          <Button variant="contained" onClick={() => handleQuickSelect('tesla', 'Model 3', 'Performance')}>
-            Quick Select Tesla Model 3 Performance
-          </Button>
+      <Button variant="contained" onClick={() => handleQuickSelect('tesla', 'Model 3', 'Performance')}>
+        Quick Select Tesla Model 3 Performance
+      </Button>
 
 
 
+      <FormControl fullWidth margin="normal">
+        <InputLabel id="make-label">Make</InputLabel>
+        <Select
+          labelId="make-label"
+          value={make}
+          onChange={handleMakeChange}
+          label="Make"
+        >
+          {Object.keys(MODELS).map((make) => (
+            <MenuItem key={make} value={make}>
+              {make.charAt(0).toUpperCase() + make.slice(1)}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+      {make && (
         <FormControl fullWidth margin="normal">
-          <InputLabel id="make-label">Make</InputLabel>
+          <InputLabel id="model-label">Model</InputLabel>
           <Select
-            labelId="make-label"
-            value={make}
-            onChange={handleMakeChange}
-            label="Make"
+            labelId="model-label"
+            value={model}
+            onChange={handleModelChange}
+            label="Model"
           >
-            {Object.keys(MODELS).map((make) => (
-              <MenuItem key={make} value={make}>
-                {make.charAt(0).toUpperCase() + make.slice(1)}
+            {Object.keys(MODELS[make]).map((model) => (
+              <MenuItem key={model} value={model}>
+                {model}
               </MenuItem>
             ))}
           </Select>
         </FormControl>
-        {make && (
-          <FormControl fullWidth margin="normal">
-            <InputLabel id="model-label">Model</InputLabel>
-            <Select
-              labelId="model-label"
-              value={model}
-              onChange={handleModelChange}
-              label="Model"
-            >
-              {Object.keys(MODELS[make]).map((model) => (
-                <MenuItem key={model} value={model}>
-                  {model}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        )}
-        {model && (
-          <FormControl fullWidth margin="normal">
-            <InputLabel id="badge-label">Badge</InputLabel>
-            <Select
-              labelId="badge-label"
-              value={badge}
-              onChange={handleBadgeChange}
-              label="Badge"
-            >
-              {MODELS[make][model].map((badge) => (
-                <MenuItem key={badge} value={badge}>
-                  {badge}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        )}
-        {badge && (
-          <Box marginTop={2}>
-            <Button variant="contained" component="label">
-              Upload Service Logbook<span style={{ fontSize: '8px' }}>(.txt,.pdf,.doc,.docx)</span>
-              <input
-                type="file"
-                hidden
-                onChange={handleLogbookUpload}
-                accept=".txt,.pdf,.doc,.docx"
-              />
-            </Button>
-            {logbook && (
-              <Typography variant="body1" marginTop={2}>
-                {logbook.name}
-              </Typography>
-            )}
-          </Box>
-        )}
-        <Button type="submit" variant="contained" color="primary" disabled={!make || !model || !badge || !logbook}>
-          Submit
-        </Button>
+      )}
+      {model && (
+        <FormControl fullWidth margin="normal">
+          <InputLabel id="badge-label">Badge</InputLabel>
+          <Select
+            labelId="badge-label"
+            value={badge}
+            onChange={handleBadgeChange}
+            label="Badge"
+          >
+            {MODELS[make][model].map((badge) => (
+              <MenuItem key={badge} value={badge}>
+                {badge}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      )}
+      {badge && (
+        <Box marginTop={2}>
+          <Button variant="contained" component="label">
+            Upload Service Logbook <span style={{ fontSize: '8px' }}>(.txt,.pdf,.doc,.docx)</span>
+            <input
+              type="file"
+              hidden
+              onChange={handleLogbookUpload}
+              accept=".txt,.pdf,.doc,.docx"
+            />
+          </Button>
+          {logbook && (
+            <Typography variant="body1" marginTop={2}>
+              {logbook.name}
+            </Typography>
+          )}
+        </Box>
+      )}
+      <Button type="submit" variant="contained" color="primary" disabled={!make || !model || !badge || !logbook}>
+        Submit
+      </Button>
+
     </Box>
   );
 };
