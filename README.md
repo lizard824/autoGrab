@@ -16,21 +16,23 @@ This project is a vehicle selector application built with React on the client si
 - npm (Node Package Manager)
 
 ### Steps
-
 1. Clone the repository:
    ```sh
    git clone https://github.com/lizard824/autoGrab.git
-   
+   ```
 2. Install & Run server dependencies 
-cd server
-npm install
-npm run start
-
+    ```sh
+   cd server
+   npm install
+   npm run start
+   ```
 3. Install & Run client dependencies
-cd ../client
-npm install
-npm run start
-
+   ```sh
+   cd ../client
+   npm install
+   npm run start
+   ```
 ### Testing(server & client)
-``` sh
-npm run test
+   ```sh
+   npm run test
+   ```

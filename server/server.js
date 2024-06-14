@@ -4,8 +4,8 @@
  * @Author: shenkai03
  * @Date: 2024-06-13 16:27:22
  * @LastEditors: shenkai03
- * @LastEditTime: 2024-06-13 18:30:41
- * @FilePath: /server/server.js
+ * @LastEditTime: 2024-06-14 10:55:23
+ * @FilePath: /autoGrab/server/server.js
  * Copyright (C) 2024 shenkai03. All rights reserved.
  */
 const Koa = require('koa');
@@ -13,7 +13,6 @@ const Router = require('@koa/router');
 const multer = require('@koa/multer');
 const cors = require('@koa/cors');
 const bodyParser = require('koa-bodyparser');
-const fs = require('fs').promises;
 
 const app = new Koa();
 const router = new Router();
